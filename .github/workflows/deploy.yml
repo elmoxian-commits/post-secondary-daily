@@ -1,0 +1,47 @@
+name: Deploy Post-Secondary Daily
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    # Runs at 12:00 UTC daily (≈ 6:00 AM Winnipeg time depending on DST)
+    - cron: '0 12 * * *'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: copy-of-post-secondary-daily/package-lock.json
+
+      - name: Install dependencies
+        working-directory: copy-of-post-secondary-daily
+        run: |
+          npm ci || npm install
+
+      - name: Build site
+        working-directory: copy-of-post-secondary-daily
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: copy-of-post-secondary-daily/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
