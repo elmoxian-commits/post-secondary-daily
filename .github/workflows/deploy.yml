@@ -30,7 +30,8 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-      
+          check-latest: false
+          cache-dependency-path: '**/package.json'      
 
       - name: Install dependencies
         working-directory: copy-of-post-secondary-daily
